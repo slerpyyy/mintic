@@ -32,33 +32,33 @@ bool final(uint_fast32_t board)
 	uint_fast32_t a, b, c;
 
 	// check rows
-	for(int_fast8_t i=0; i<3; i++)
+	for(int_fast8_t i=0; i<12; i+=6)
 	{
-		a = 3 & (board >> (6 * i));
-		b = 3 & (board >> (6 * i + 2));
-		c = 3 & (board >> (6 * i + 4));
+		a = 3 & (board >> i);
+		b = 3 & (board >> (i + 2));
+		c = 3 & (board >> (i + 4));
 		if((a & b & c) == 0)continue;
 		if((a | b | c) == 3)continue;
 		return true;
 	}
 
 	// check cols
-	for(int_fast8_t i=0; i<3; i++)
+	for(int_fast8_t i=0; i<6; i+=2)
 	{
-		a = 3 & (board >> (2 * i));
-		b = 3 & (board >> (2 * i + 6));
-		c = 3 & (board >> (2 * i + 12));
+		a = 3 & (board >> i);
+		b = 3 & (board >> (i + 6));
+		c = 3 & (board >> (i + 12));
 		if((a & b & c) == 0)continue;
 		if((a | b | c) == 3)continue;
 		return true;
 	}
 
 	// check diagonals
-	for(int_fast8_t i=0; i<2; i++)
+	for(int_fast8_t i=0; i<8; i+=4)
 	{
-		a = 3 & (board >> (4 * i));
+		a = 3 & (board >> i);
 		b = 3 & (board >> 8);
-		c = 3 & (board >> (16 - 4 * i));
+		c = 3 & (board >> (16 - i));
 		if((a & b & c) == 0)continue;
 		if((a | b | c) == 3)continue;
 		return true;
@@ -68,30 +68,36 @@ bool final(uint_fast32_t board)
 	return false;
 }
 
-
 // score game state using negmax
 int_fast8_t score(uint_fast32_t board, uint_fast8_t player)
 {
 	// check if previous move has ended the game
 	if(final(board))return -30;
 
+	// default return val
 	int_fast8_t val = -60;
+
+	// setup vars to speed up loop
+	uint_fast32_t shift_board = board;
+	uint_fast32_t shift_player = player;
+	uint_fast8_t new_player = player ^ 3;
 
 	for(int_fast8_t i=0; i<9; i++)
 	{
 		// check if cell is empty
-		uint_fast32_t cell = 3 & (board >> 2*i);
-		if(cell != 0)continue;
+		if((shift_board & 3) == 0)
+		{
+			// recusive call
+			int_fast8_t sub_score = -score(board | shift_player, new_player);
 
-		// recusive call
-		uint_fast32_t new_board = board | (player << 2*i);
-		int_fast8_t sub_score = -score(new_board, player ^ 3);
+			// calculate val
+			sub_score -= sub_score > 0 ? 1 : -1;
+			val = sub_score > val ? sub_score : val;
+		}
 
-		// prefere shortest route
-		sub_score -= sub_score > 0 ? 1 : -1;
-
-		// calculate val
-		val = sub_score > val ? sub_score : val;
+		// update vars
+		shift_player = shift_player << 2;
+		shift_board = shift_board >> 2;
 	}
 
 	return val;
