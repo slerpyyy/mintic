@@ -73,10 +73,7 @@ bool final(uint_fast32_t board)
 int_fast8_t score(uint_fast32_t board, uint_fast8_t player)
 {
 	// check if previous move has ended the game
-	if(final(board))
-	{
-		return -30;
-	}
+	if(final(board))return -30;
 
 	int_fast8_t val = -60;
 
@@ -120,10 +117,7 @@ uint_fast32_t walk(char *seq)
 		}
 
 		// ignore "0" steps
-		if(off != 0)
-		{
-			board |= player << (2 * off - 2);
-		}
+		if(off != 0)board |= player << (2 * off - 2);
 
 		player ^= 0x3;
 		seq++;
@@ -144,23 +138,36 @@ int main(int argc, char *argv[])
 	uint_fast32_t board = walk(argv[1]);
 	uint_fast8_t player = 1 + (strlen(argv[1]) & 1);
 
-	printf("\nnext: %d\n", player);
+	if(final(board))
+	{
+		puts("Game over");
+		exit(0);
+	}
 
-	dump(board);
 
-	if(final(board))puts("game over");
+	int_fast8_t *score_board = (int_fast8_t *)malloc(9 * sizeof(int_fast8_t));
+	int_fast8_t highscore = -100;
 
 	for(int_fast8_t i=0; i<9; i++)
 	{
+		score_board[i] = -100;
+
 		// check if cell is empty
 		uint_fast32_t cell = 3 & (board >> 2*i);
 		if(cell != 0)continue;
 
+		// calculate score
 		uint_fast32_t new_board = board | (player << 2*i);
-		int res = -score(new_board, player);
+		int_fast8_t res = (score_board[i] = -score(new_board, player ^ 3));
 
-		printf(">>> %d: %d\n", i+1, res);
-		//dump(new_board);
+		// track highscore
+		if(res > highscore)highscore = res;
+	}
+
+	for(int_fast8_t i=0; i<9; i++)
+	{
+		if(score_board[i] < highscore)continue;
+		printf("%d ", i + 1);
 	}
 
 	putchar('\n');
