@@ -32,7 +32,7 @@ bool final(uint_fast32_t board)
 	uint_fast32_t a, b, c;
 
 	// check rows
-	for(int_fast8_t i=0; i<12; i+=6)
+	for(int_fast8_t i=0; i<18; i+=6)
 	{
 		a = 3 & (board >> i);
 		b = 3 & (board >> (i + 2));
