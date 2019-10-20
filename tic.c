@@ -131,7 +131,7 @@ uint_fast32_t walk(char *seq)
 			goto SEQ_ERROR;
 		}
 
-		// ignore "0" moves
+		// skip "0" moves
 		if(move != 0)
 		{
 			uint_fast32_t off = 2 * move - 2;
@@ -152,8 +152,8 @@ uint_fast32_t walk(char *seq)
 		continue;
 
 	SEQ_ERROR:
-		fprintf(stderr, "seq: %s\n     ", seq);
-		while(i --> 0)fputc(' ', stderr);
+		fprintf(stderr, "seq: %s\n", seq);
+		for(i += 5; i>0; i--)fputc(' ', stderr);
 		fprintf(stderr, "^\n");
 		exit(-1);
 	}
