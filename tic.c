@@ -16,7 +16,7 @@ void dump(uint_fast32_t board)
 		{
 			int cell = board & 3;
 			printf(" %02x", cell);
-			board = board >> 2;
+			board >>= 2;
 		}
 
 		putchar('\n');
@@ -78,26 +78,26 @@ int_fast8_t score(uint_fast32_t board, uint_fast8_t player)
 	int_fast8_t val = -60;
 
 	// setup vars to speed up loop
-	uint_fast32_t shift_board = board;
-	uint_fast32_t shift_player = player;
+	uint_fast32_t sh_board = board;
+	uint_fast32_t sh_player = player;
 	uint_fast8_t new_player = player ^ 3;
 
 	for(int_fast8_t i=0; i<9; i++)
 	{
 		// check if cell is empty
-		if((shift_board & 3) == 0)
+		if((sh_board & 3) == 0)
 		{
 			// recusive call
-			int_fast8_t sub_score = -score(board | shift_player, new_player);
+			int_fast8_t sub_score = -score(board | sh_player, new_player);
 
 			// calculate val
 			sub_score -= sub_score > 0 ? 1 : -1;
-			val = sub_score > val ? sub_score : val;
+			if(sub_score > val)val = sub_score;
 		}
 
 		// update vars
-		shift_player = shift_player << 2;
-		shift_board = shift_board >> 2;
+		sh_player <<= 2;
+		sh_board >>= 2;
 	}
 
 	return val;
@@ -110,23 +110,52 @@ uint_fast32_t walk(char *seq)
 	uint_fast32_t board = 0;
 	uint_fast32_t player = 1;
 
-	int_fast8_t len = strlen(seq);
-	for(int_fast8_t i=0; i<len; i++)
+	char *sh_seq = seq;
+	size_t len = strlen(seq);
+
+	if(len > 64)
 	{
-		uint_fast32_t off = *seq - '0';
+		fprintf(stderr, "ERROR: Se- Senpai! The stwing it too big! UwU\n");
+		exit(-1);
+	}
+
+	int_fast8_t iter = len;
+	for(int_fast8_t i=0; i<iter; i++)
+	{
+		uint_fast32_t move = *sh_seq - '0';
 
 		// catch invalid character
-		if(off > 9)
+		if(move > 9)
 		{
 			fprintf(stderr, "ERROR: invalid sequence\n");
-			exit(-1);
+			goto SEQ_ERROR;
 		}
 
-		// ignore "0" steps
-		if(off != 0)board |= player << (2 * off - 2);
+		// ignore "0" moves
+		if(move != 0)
+		{
+			uint_fast32_t off = 2 * move - 2;
+
+			// check if cell is empty
+			if((3 & (board >> off)) != 0)
+			{
+				fprintf(stderr, "ERROR: invalid move\n");
+				goto SEQ_ERROR;
+			}
+
+			board |= player << off;
+		}
 
 		player ^= 0x3;
-		seq++;
+		sh_seq++;
+
+		continue;
+
+	SEQ_ERROR:
+		fprintf(stderr, "seq: %s\n     ", seq);
+		while(i --> 0)fputc(' ', stderr);
+		fprintf(stderr, "^\n");
+		exit(-1);
 	}
 
 	return board;
@@ -141,42 +170,62 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
+	// generate board form sequence
 	uint_fast32_t board = walk(argv[1]);
 	uint_fast8_t player = 1 + (strlen(argv[1]) & 1);
 
+	// exit if game is aleady in final state
 	if(final(board))
 	{
 		puts("Game over");
 		exit(0);
 	}
 
-
-	int_fast8_t *score_board = (int_fast8_t *)malloc(9 * sizeof(int_fast8_t));
+	// setup vars for loop
 	int_fast8_t highscore = -100;
+	int_fast8_t *score_board = (int_fast8_t *)malloc(9 * sizeof(int_fast8_t));
 
+	// vars for better performance
+	uint_fast32_t sh_board = board;
+	uint_fast32_t sh_player = player;
+
+	// loops through all possible moves
 	for(int_fast8_t i=0; i<9; i++)
 	{
-		score_board[i] = -100;
+		int_fast8_t curr_score = -100;
 
 		// check if cell is empty
-		uint_fast32_t cell = 3 & (board >> 2*i);
-		if(cell != 0)continue;
+		uint_fast32_t cell = 3 & sh_board;
+		if(cell == 0)
+		{
+			// calculate score
+			curr_score = -score(board | sh_player, player ^ 3);
 
-		// calculate score
-		uint_fast32_t new_board = board | (player << 2*i);
-		int_fast8_t res = (score_board[i] = -score(new_board, player ^ 3));
+			// track highscore
+			if(curr_score > highscore)highscore = curr_score;
+		}
 
-		// track highscore
-		if(res > highscore)highscore = res;
+		// update vars
+		score_board[i] = curr_score;
+		sh_board >>= 2;
+		sh_player <<= 2;
 	}
 
+	// setup format string
+	const char *full_format = " %d";
+	const char *format = full_format + 1;
+
+	// print moves with highest score
 	for(int_fast8_t i=0; i<9; i++)
 	{
 		if(score_board[i] < highscore)continue;
-		printf("%d ", i + 1);
+
+		printf(format, i + 1);
+		format = full_format;
 	}
 
 	putchar('\n');
+	free(score_board);
 
 	return 0;
 }
