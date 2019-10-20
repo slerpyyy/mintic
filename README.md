@@ -1,4 +1,4 @@
-# tic
+# mintic
 *Minimal Tic-Tac-Toe Solver*
 
 ![sample-text](https://img.shields.io/badge/build-sample%20text-brightgreen)
@@ -6,7 +6,7 @@
 ![gotta-go-fast](https://img.shields.io/badge/gotta%20go-fast-blue)
 ![recursion](https://img.shields.io/badge/recursion-yes-red)
 
-tic is a minimalistic tic-tac-toe AI, which takes in a sequence of moves in a tic-tac-toe game and prints out the best possible following move. There are no flags and no interactive mode, you just give it the sequence as the only command line argument and it gives you the result and exits.
+mintic is a minimalistic tic-tac-toe AI, which takes in a sequence of moves in a tic-tac-toe game and prints out the best possible following move. There are no flags and no interactive mode, you just give it the sequence as the only command line argument and it gives you the result and exits.
 
 ## How do I use it?
 
@@ -22,10 +22,10 @@ Every cell in the tic-tac-toe board is assigned a number, starting at 1, countin
  numbering      "127459"       "10569"
 ```
 
-Given a sequence of moves, tic returns the best following move. tic can also return multiple results if they are seen as equally good.
+Given a sequence of moves, mintic returns the best following move. mintic can also return multiple results if they are seen as equally good.
 
 ```
-$ ./tic 127459
+$ ./mintic 127459
 3
 ```
 
@@ -33,16 +33,16 @@ $ ./tic 127459
 
 ## Setup
 
-Download and build the program:
+Download and install:
 ```
-git clone https://github.com/slerpyyy/tic.git
-cd tic
-make
+git clone https://github.com/slerpyyy/mintic.git
+cd mintic
+make install
 ```
 
 Run the program:
 ```
-./tic <sequence>
+./mintic <sequence>
 ```
 
 ## Why does this exist?
