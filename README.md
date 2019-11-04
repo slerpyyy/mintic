@@ -25,7 +25,7 @@ Every cell in the tic-tac-toe board is assigned a number, starting at 1, countin
 Given a sequence of moves, mintic returns the best following move. mintic can also return multiple results if they are seen as equally good.
 
 ```
-$ ./mintic 127459
+$ mintic 127459
 3
 ```
 
@@ -42,7 +42,7 @@ make install
 
 Run the program:
 ```
-./mintic <sequence>
+mintic <sequence>
 ```
 
 ## Why does this exist?

@@ -212,8 +212,8 @@ int main(int argc, char *argv[])
 	}
 
 	// setup format string
-	const char *full_format = " %d";
-	const char *format = full_format + 1;
+	char *full_format = " %d";
+	char *format = full_format + 1;
 
 	// print moves with highest score
 	for(int_fast8_t i=0; i<9; i++)
